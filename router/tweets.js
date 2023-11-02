@@ -76,7 +76,7 @@ router.delete('/:id',(req,res,next) =>{
     const id = req.params.id
     tweets = tweets.filter((tweet)=> tweet.id !== id)   
     res.sendStatus(204).json({message:`Tweet id(${id}) is deleted`})
-})
+});
 
 
 export default router
