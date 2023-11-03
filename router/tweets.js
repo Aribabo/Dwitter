@@ -1,17 +1,32 @@
 import express from "express";
+import {body} from 'express-validator'
 import * as tweetController from '../controler/tweet.js'
+import {validate} from '../middleware/validator.js'
+
 const router = express.Router();
 
-// GET / Tweets
-// GET / Tweets?username=:username
-// 이건 그냥 썼을때
-// router.get('/',(req,res,next) => {
-//     const username = req.query.username
-//     const data = username //3항연산자 사용 => 변수=조건식?참:거짓
-//         ? tweets.filter((tweet)=> tweet.username === username) //타입까지 비교하려고 === 사용, username이 있을때 실행
-//         : tweets; //username이 없을때          
-//     res.status(200).json(data)
-// })
+const validationTweet = [
+    body('text').trim().isLength({min:3}).withMessage('최소 3자 이상 입력해주세요'),validate
+]
+
+
+
+/* POST,PUT에 text에 대해 빈문자열을 없애도 최소 3자이상 입력해야 저장되도록 API에 적용 */
+
+
+/*
+GET / Tweets
+GET / Tweets?username=:username
+이건 그냥 썼을때
+router.get('/',(req,res,next) => {
+    const username = req.query.username
+    const data = username //3항연산자 사용 => 변수=조건식?참:거짓
+        ? tweets.filter((tweet)=> tweet.username === username) //타입까지 비교하려고 === 사용, username이 있을때 실행
+        : tweets; //username이 없을때          
+    res.status(200).json(data)
+})
+*/
+
 // 이건 작업별로 분리했을때
 router.get('/',tweetController.getTweets) // getTweets()를 해주면 바로 실행되니까 ()안쓰고 써줌
 
@@ -44,7 +59,7 @@ router.get('/:id',tweetController.getTweet)
 //     res.status(201).json(tweets)
 // })
 
-router.post('/',tweetController.createTweet)
+router.post('/',validationTweet,tweetController.createTweet)
 
 
 // PUT / Tweets/:id -> find
@@ -60,7 +75,7 @@ router.post('/',tweetController.createTweet)
 //     }
 // })
 //작업별로
-router.get('put/:id',tweetController.updateTweet)
+router.put('/:id',validationTweet,tweetController.updateTweet)
 
 // DELETE / Tweets/:id -> filter
 // router.delete('/:id',(req,res,next) =>{
