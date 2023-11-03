@@ -9,11 +9,6 @@ const validationTweet = [
     body('text').trim().isLength({min:3}).withMessage('최소 3자 이상 입력해주세요'),validate
 ]
 
-
-
-
-
-
 /*
 GET / Tweets
 GET / Tweets?username=:username
