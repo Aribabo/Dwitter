@@ -4,14 +4,14 @@ import * as tweetController from '../controler/tweet.js'
 import {validate} from '../middleware/validator.js'
 
 const router = express.Router();
-
+/* POST,PUT에 text에 대해 빈문자열을 없애도 최소 3자이상 입력해야 저장되도록 API에 적용 */
 const validationTweet = [
     body('text').trim().isLength({min:3}).withMessage('최소 3자 이상 입력해주세요'),validate
 ]
 
 
 
-/* POST,PUT에 text에 대해 빈문자열을 없애도 최소 3자이상 입력해야 저장되도록 API에 적용 */
+
 
 
 /*
