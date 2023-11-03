@@ -13,6 +13,7 @@ const validationTweet = [
 GET / Tweets
 GET / Tweets?username=:username
 이건 그냥 썼을때
+localhost:8080/Tweets/
 router.get('/',(req,res,next) => {
     const username = req.query.username
     const data = username //3항연산자 사용 => 변수=조건식?참:거짓
@@ -24,7 +25,7 @@ router.get('/',(req,res,next) => {
 
 // 이건 작업별로 분리했을때
 router.get('/',tweetController.getTweets) // getTweets()를 해주면 바로 실행되니까 ()안쓰고 써줌
-
+//localhost:8080/Tweets/1
 // GET / Tweets/:id
 // 이건 그냥 썼을때
 // router.get('/:id',(req,res,next) => {
@@ -39,6 +40,7 @@ router.get('/',tweetController.getTweets) // getTweets()를 해주면 바로 실
 //이건 작업별로 썼을때 
 router.get('/:id',tweetController.getTweet)
 
+//localhost:8080/Tweets/ body가 있을때 즉, 사용자의 입력값이 url이 아니라 따로 있을때
 // POST / Tweets
 // router.post('/',(req,res,next) => {
 //     const {text,name,username} = req.body
