@@ -11,7 +11,7 @@ let users = [
     }
 ]
 
-export async function create(id,username,password,name,email){
+export async function create(username,password,name,email){
     const user = {
         id : 2, 
         username,
@@ -25,6 +25,9 @@ export async function create(id,username,password,name,email){
 }
 
 export async function userCheck(username){
-    const user = users.find((user)=> user.username===username)
-    return user['password']
+    const user = users.find((user)=> user.username===username) 
+    if(user){
+        return user['password']
+    }else{return res.status(400).json('로그인 실패')}
+    
 }
