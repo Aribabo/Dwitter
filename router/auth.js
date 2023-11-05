@@ -17,6 +17,7 @@ const router = express.Router();
 
 router.post('/signup',authController.createUser)
 router.post('/login',authController.login)
+router.get('/me', authController.jwtToken)
 // router.post('/jwt',authController.singup)
 
 export default router
