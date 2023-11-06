@@ -1,7 +1,8 @@
 import express from "express";
 import {body} from 'express-validator'
-import * as tweetController from '../controler/tweet.js'
+import * as tweetController from '../controller/tweet.js'
 import {validate} from '../middleware/validator.js'
+import {isAuth} from '../middleware/auth.js'
 
 const router = express.Router();
 /* POST,PUT에 text에 대해 빈문자열을 없애도 최소 3자이상 입력해야 저장되도록 API에 적용 */
@@ -24,7 +25,7 @@ router.get('/',(req,res,next) => {
 */
 
 // 이건 작업별로 분리했을때
-router.get('/',tweetController.getTweets) // getTweets()를 해주면 바로 실행되니까 ()안쓰고 써줌
+router.get('/',isAuth, tweetController.getTweets) // getTweets()를 해주면 바로 실행되니까 ()안쓰고 써줌
 //localhost:8080/Tweets/1
 // GET / Tweets/:id
 // 이건 그냥 썼을때
@@ -38,25 +39,12 @@ router.get('/',tweetController.getTweets) // getTweets()를 해주면 바로 실
 //     }
 // })
 //이건 작업별로 썼을때 
-router.get('/:id',tweetController.getTweet)
+router.get('/:id',isAuth,tweetController.getTweet)
 
-//localhost:8080/Tweets/ body가 있을때 즉, 사용자의 입력값이 url이 아니라 따로 있을때
+
 // POST / Tweets
-// router.post('/',(req,res,next) => {
-//     const {text,name,username} = req.body
-//     const tweet = {
-//         id: '10',
-//         text, //자바는 키와 값의 이름이 같다면 생략가능 지금 text:text의 생략이 text
-//         createdAt : Date.now().toString(), 
-//         name, //키와 값 같아서 생략
-//         username //키와 값 같아서 생략
-//     }
 
-//     tweets = [tweet, ...tweets] // 수정될 것을 대비해서 트윗을 트윗스에 저장해줌 그러면 이제 서로 다른 메모리값을 가짐
-//     res.status(201).json(tweets)
-// })
-
-router.post('/',validationTweet,tweetController.createTweet)
+router.post('/',isAuth,validationTweet,tweetController.createTweet)
 
 
 // PUT / Tweets/:id -> find
@@ -72,7 +60,7 @@ router.post('/',validationTweet,tweetController.createTweet)
 //     }
 // })
 //작업별로
-router.put('/:id',validationTweet,tweetController.updateTweet)
+router.put('/:id',isAuth,validationTweet,tweetController.updateTweet)
 
 // DELETE / Tweets/:id -> filter
 // router.delete('/:id',(req,res,next) =>{
@@ -80,6 +68,6 @@ router.put('/:id',validationTweet,tweetController.updateTweet)
 //     tweets = tweets.filter((tweet)=> tweet.id !== id)   
 //     res.sendStatus(204).json({message:`Tweet id(${id}) is deleted`})
 // });
-router.delete('/:id',tweetController.deleteTweet)
+router.delete('/:id',isAuth,tweetController.deleteTweet)
 
 export default router
