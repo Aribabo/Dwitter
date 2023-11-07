@@ -1,11 +1,7 @@
 import * as userRepository from '../data/auth.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
-// 추후에 설정파일로 이동후 적용할 예정
-const jwtSecretKey = 'abcdefg1234$#%#$'
-const jwtExpiresInDays = '2d'
-const bcryptSaltRounds= 12 // salt는 암호학이라는 뜻
+import {config} from '../config.js'
 
 
 export async function signup(req,res){
@@ -14,7 +10,7 @@ export async function signup(req,res){
     if(found){
         return res.status(409).json({message: `${username}이 이미 존재함`}) // 중복은 보통 409
     }
-    const hashed = await bcrypt.hashSync(password,bcryptSaltRounds)
+    const hashed = await bcrypt.hashSync(password,config.bcrypt.saltRounds)
     const userId = await userRepository.createUser({
         username,
         password:hashed,
@@ -26,7 +22,7 @@ export async function signup(req,res){
     res.status(201).json({token,username}) //가입은 보통 201
 }
 export function createJwtToken(id){
-    return jwt.sign({id},jwtSecretKey,{expiresIn:jwtExpiresInDays})
+    return jwt.sign({id},config.jwt.secretKey,{expiresIn:config.jwt.expiresInSec})
 }
 
 export async function me(req,res,next){
