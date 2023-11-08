@@ -19,6 +19,7 @@ const validateSignup = [
     body('url').isURL().withMessage('url 형식 확인').optional({nullable:true,ckeckFalsy:true}), // null값 허용 및 값없을때 null로 처리
     validate
 ]
+
 // 회원가입
 router.post('/signup',validateSignup,authController.signup)
 // 로그인

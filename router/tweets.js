@@ -14,25 +14,21 @@ const validationTweet = [
 GET / Tweets
 GET / Tweets?username=:username
 */
-
 router.get('/',isAuth, tweetController.getTweets) // getTweets()를 해주면 바로 실행되니까 ()안쓰고 써줌
+
 //localhost:8080/Tweets/1
 // GET / Tweets/:id
-
 router.get('/:id',isAuth,tweetController.getTweet)
 
 
 // POST / Tweets
-
 router.post('/',isAuth,validationTweet,tweetController.createTweet)
 
 
 // PUT / Tweets/:id -> find
-
 router.put('/:id',isAuth,validationTweet,tweetController.updateTweet)
 
 // DELETE / Tweets/:id -> filter
-
 router.delete('/:id',isAuth,tweetController.deleteTweet)
 
 export default router
