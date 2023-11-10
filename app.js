@@ -4,6 +4,8 @@ import tweetsRouter from './router/tweets.js'
 import authRouter from './router/auth.js'
 import {config} from './config.js'
 import cors from 'cors'
+import { initSocket } from "./connection/socket.js";
+
 
 console.log(process.env.JWT_SECRET)
 const app = express()
@@ -21,4 +23,5 @@ app.use((req,res,next)=>{
     res.sendStatus(404)
 });
 
-app.listen(config.host.port)
+const server = app.listen(config.host.port)
+initSocket(server) // 함수 생성 - connection 폴더에 존재(웹소켓 관련 함수 존재)

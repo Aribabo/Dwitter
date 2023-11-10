@@ -1,4 +1,5 @@
 import * as tweetRepository from '../data/tweet.js'
+import { getSocketIO } from '../connection/socket.js'
 
 // 데이터를 여기에서 로직처리
 
@@ -27,8 +28,11 @@ export async function getTweet(req,res,next){
 //createtweet
 export async function createTweet(req,res,next){
     const {text} = req.body
-    const tweets = await tweetRepository.create(text,req.userId) // 만들 텍스트와 로그인한 유저(토큰)의 아이디 전달해서 무조건 자신의 게시물을 쓰게끔
-    res.status(201).json(tweets)
+    const tweet = await tweetRepository.create(text,req.userId) // 만들 텍스트와 로그인한 유저(토큰)의 아이디 전달해서 무조건 자신의 게시물을 쓰게끔
+    res.status(201).json(tweet)
+    // 이미 소켓은 입장시에 연결되어있음으로 가져다가 사용
+    getSocketIO().emit('tweets',tweet) // getSocketIO()이 이미 소켓역할을 함, 클라이언트 쪽에 on을 만들 예정
+
 }
 
 
