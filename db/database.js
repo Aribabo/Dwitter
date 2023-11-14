@@ -1,11 +1,12 @@
-import mysql from 'mysql2'
 import { config } from '../config.js'
+import SQ from 'sequelize'
 
-const pool = mysql.createPool({ // 유저 한명이 접속 할때마다 사용자가 db와 연결할 수 있는 객체 생성
-    host : config.db.host,
-    user : config.db.user,
-    database : config.db.database,
-    password : config.db.password
-}) 
+// db접속관련 정보 가져오기
+// sequelize 사용
+const {host, user, database, password} = config.db
+export const sequelize = new SQ.Sequelize(database,user,password,{
+    host,
+    dialect : 'mysql', //오라클 등 다양한 dbms사용가능
+    logging : false
+})
 
-export const db = pool.promise() // promise 형태로 바꿔서 리턴 -> then 사용가능

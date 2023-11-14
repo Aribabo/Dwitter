@@ -1,35 +1,76 @@
-import { db } from "../db/database.js";
+import SQ from 'sequelize'
+import { sequelize } from "../db/database.js";
+import {User} from './auth.js';
 
-// 단! 트윗은 최근글이 제일 상단으로 올라오도록
+// sequelize용 데이터타입 가져다 사용
+const DataTypes =  SQ.DataTypes
+const Sequelize =  SQ.Sequelize
 
-const SELECT_JOIN = 'SELECT tw.id, tw.text, tw.createdAt, tw.userId, us.username, us.name, us.email, us.url from tweets as tw join users as us on tw.userid = us.id'
 
-const ORDER_DESC = 'order by tw.createdAt desc'
+// 
+const Tweet = sequelize.define('tweet',{
+    id:{
+        type: DataTypes.INTEGER,
+        primaryKey:true,
+        autoIncrement:true,
+        allowNull:false
+    },
+    text:{
+        type : DataTypes.TEXT,
+        allowNull:false
+    }
+    // createdAt은 안만들어도 자동생성
+})
+Tweet.belongsTo(User) // 자동으로 pk기반으로 fk생성(userId)
+
+const INCLUDE_USER = {
+    attributes : [
+        'id','text','createdAt','userId',
+        [Sequelize.col('user.name'),'name'], // user의 name을 가져오겠다 Sequelize.col을 안하면 하위객체로 가져와짐
+        [Sequelize.col('user.username'),'username'], // user의 username 가져오겠다
+        [Sequelize.col('user.url'),'url'] // user의 url 가져오겠다
+    ],
+    include:{
+        model:User, // model은 가져오고싶은 테이블
+        attributes:[], //attributes는 가져오고자 하는 내용
+    }
+}
+
+const ORDER_DESC = {
+    order:[['createdAt','DESC']] //배열로 감싼채로 입력
+}
 
 export async function getAll(){ // 모든 게시물별로 auth에 있는 유저정보를 추가해 모든 게시물을 반환
-    return db.execute(`${SELECT_JOIN} ${ORDER_DESC}`).then((result)=>result[0])
+    return Tweet.findAll({...INCLUDE_USER,...ORDER_DESC}) //INCLUDE_USER나 ORDER_DESC가 달라지면 같이 달라지게 ...사용
 
 } //데이터를 가져오는 함수 생성(가져오는 동안 에러나면 안되니까 비동기로 처리)
 
 
 export async function getAllByUsername(username){ // 특정 유저의 게시글 전부 추출(근데이제url에 입력한애로)
-    return db.execute(`${SELECT_JOIN} where username = ? ${ORDER_DESC}`,[username]).then((result) => result[0])
+    return Tweet.findAll({...INCLUDE_USER,...ORDER_DESC,
+        include:{ // INCLUDE_USER.include는  INCLUDE_USER.include과 Tweet을 조인해주는 거임
+            ...INCLUDE_USER.include,where:{username} // INCLUDE_USER의 include인 User테이블을 활용하여 조인, where로 조인조건적용
+        }})
 }
 
-export async function getByID(id){ // 특정 게시물 검색
-    return db.execute(`${SELECT_JOIN} where tw.id = ? ${ORDER_DESC}`,[id]).then((result) => result[0][0])
-}
 
-export async function create(text,userId){ // 입력후엔 아이디번호를 알아내 해당 아이디의 모든글 뽑아내기
-    return db.execute('insert into tweets (text,createdAt,userId) values (?,?,?)',[text,new Date(),userId]).then((result) => getByID(result[0].insertId))
-    // tweets = [tweet, ...tweets] // 수정될 것을 대비해서 트윗을 트윗스에 저장해줌 그러면 이제 서로 다른 메모리값을 가짐
-    // return getByID(tweet.id) // 게시물 아이디로 검색한 결과(게시물)리턴
+export async function getById(id){
+    return Tweet.findOne({ where: {id}, ...INCLUDE_USER})
+}
+export async function create(text, userId){
+    return Tweet.create({text, userId})
+        .then((data) => this.getById(data.dataValues.id))
 }
 
 export async function update(id,text){
-    return db.execute('update tweets set text = ? where id = ?',[text,id]).then(()=> getByID(id))
+    return Tweet.findByPk(id,INCLUDE_USER).then((tweet)=>{
+        tweet.text = text
+        return tweet.save()
+    })
 }
 
 export async function remove(id){
-    return db.execute('delete from tweets where id = ?',[id])
+    return Tweet.findByPk(id).then((tweet)=>{
+        tweet.destroy()
+    })
 }

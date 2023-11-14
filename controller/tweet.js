@@ -16,7 +16,7 @@ export async function getTweets(req,res,next){
 //gettweet
 export async function getTweet(req,res,next){
     const id = req.params.id
-    const tweet = await tweetRepository.getByID(id) //getByID는 특정게시물 아이디를 가진애 추출
+    const tweet = await tweetRepository.getById(id) //getByID는 특정게시물 아이디를 가진애 추출
     if (tweet){
         res.status(200).json(tweet)
     }else{
@@ -40,7 +40,7 @@ export async function createTweet(req,res,next){
 export async function updateTweet(req,res,next){
     const text = req.body.text 
     const id = req.params.id 
-    const tweet = await tweetRepository.getByID(id) //바꾸고싶은 게시글아이디로 검색해서 게시글 불러옴
+    const tweet = await tweetRepository.getById(id) //바꾸고싶은 게시글아이디로 검색해서 게시글 불러옴
     if(!tweet){
         res.status(404).json({message:`Tweet id(${id}) not found`})
     }
@@ -56,7 +56,7 @@ export async function updateTweet(req,res,next){
 //deletetweet
 export async function deleteTweet(req,res,next){
     const id = req.params.id 
-    const tweet = await tweetRepository.getByID(id) //삭제하고 싶은 게시물을 가지고옴
+    const tweet = await tweetRepository.getById(id) //삭제하고 싶은 게시물을 가지고옴
 
     if(!tweet){
         return res.status(404).json({message:`Tweet id(${id}) not found`}) //게시물 없을때
