@@ -1,17 +1,15 @@
-import { db } from "../db/database.js"
-
-// db연결
-
-export async function createUser(user){
-    const {username, password, name, email, url} = user
-    return db.execute('insert into users (username, password, name, email, url) values(?,?,?,?,?)',[username, password, name, email, url])
-    .then((result)=>result[0].insertId)
+import {getUsers} from '../db/database.js';
+import MongoDB from 'mongodb';
+const ObjectID = MongoDB.ObjectId; // unique로 항상 붙던 Id 변수를 하나 만듬
+export async function findByUsername(username){
+    return getUsers().find({username}).next().then(mapOptionalUser)
 }
-
-export async function findByUsername(username){ // 무조건 []로 넣어줘야함
-    return db.execute('select * from users where username = ?',[username]).then((result)=>result[0][0])
-}
-
 export async function findById(id){
-    return db.execute('select * from users where id = ?',[id]).then((result)=>result[0][0])
+    return getUsers().find({_id: new ObjectID(id)}).next().then(mapOptionalUser) // 몽고디비에서 사용하는 ObjectID형식으로 id를 변환해서 찾은 후 id값으로 넣어줌
+}
+export async function createUser(user) {
+    return getUsers().insertOne(user).then((result) => console.log(result.insertedId.toString()));
+}
+function mapOptionalUser(user) {
+    return user ? {...user, id: user._id.toString()} : user;
 }

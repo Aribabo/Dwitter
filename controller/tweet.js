@@ -1,71 +1,50 @@
 import * as tweetRepository from '../data/tweet.js'
-import { getSocketIO } from '../connection/socket.js'
-
-// 데이터를 여기에서 로직처리
-
-
-
-export async function getTweets(req,res,next){
-    const username = req.query.username 
-    const data = await(username
-        ?tweetRepository.getAllByUsername(username) // username 있으면 해당 유저의 글만 추출
-        :tweetRepository.getAll()) // username없으면 전체게시물 추출
-    res.status(200).json(data)
+import { getSocketIo } from '../connection/socket.js';
+export async function getTweets(req, res) {
+    const username = req.query.username;
+    const data = await (username
+        ? tweetRepository.getAllByUsername(username)
+        : tweetRepository.getAll());
+    res.status(200).json(data);
 }
-
-//gettweet
-export async function getTweet(req,res,next){
-    const id = req.params.id
-    const tweet = await tweetRepository.getByID(id) //getByID는 특정게시물 아이디를 가진애 추출
-    if (tweet){
-        res.status(200).json(tweet)
+export async function getTweet(req, res, next) {
+    const id = req.params.id;
+    const tweet = await tweetRepository.getById(id)
+    if (tweet) {
+        res.status(200).json(tweet);
     }else{
-        res.status(404).json({message:`Tweet id(${id}) not found`})
+        res.status(404).json({message: `Tweet id(${id}) not found`});
     }
 }
-
-
-//createtweet
-export async function createTweet(req,res,next){
-    const {text} = req.body
-    const tweet = await tweetRepository.create(text,req.userId) // 만들 텍스트와 로그인한 유저(토큰)의 아이디 전달해서 무조건 자신의 게시물을 쓰게끔
-    res.status(201).json(tweet)
-    // 이미 소켓은 입장시에 연결되어있음으로 가져다가 사용
-    getSocketIO().emit('tweets',tweet) // getSocketIO()이 이미 소켓역할을 함, 클라이언트 쪽에 on을 만들 예정
-
+export async function createTweet(req, res, next) {
+    const {text} = req.body;
+    const tweet = await tweetRepository.create(text, req.userId);
+    res.status(201).json(tweet);
+    getSocketIo().emit('tweets', tweet);
 }
-
-
-//updatetweet
-export async function updateTweet(req,res,next){
-    const text = req.body.text 
-    const id = req.params.id 
-    const tweet = await tweetRepository.getByID(id) //바꾸고싶은 게시글아이디로 검색해서 게시글 불러옴
-    if(!tweet){
-        res.status(404).json({message:`Tweet id(${id}) not found`})
+export async function updateTweet(req, res, next) {
+    const id = req.params.id
+    const text = req.body.text;
+    const tweet = await tweetRepository.getById(id);
+    if (!tweet) {
+        res.status(404).json({message: `Tweet id(${id}) not found`})
     }
-    if(tweet.userId !== req.userId){ // 로그인한 유저(req.userid)와 게시물작성자아이디 일치하는지 확인
-        return res.status(404).json({message:`Tweet 수정 권한 없음`}) //일치안할시
+    if(tweet.userId !== req.userId){
+        return res.status(403).json({message: `권한 없음!`})
     }
-    
-    const updated = await tweetRepository.update(id,text) //일치할시
-    res.status(201).json(updated)
-}
-
-
-//deletetweet
-export async function deleteTweet(req,res,next){
-    const id = req.params.id 
-    const tweet = await tweetRepository.getByID(id) //삭제하고 싶은 게시물을 가지고옴
-
-    if(!tweet){
-        return res.status(404).json({message:`Tweet id(${id}) not found`}) //게시물 없을때
+    const updated = await tweetRepository.update(id, text)
+    res.status(200).json(updated);
+};
+export async function deleteTweet(req, res, next){
+    const id = req.params.id;
+    const tweet = await tweetRepository.getById(id);
+    if (!tweet) {
+        res.status(404).json({message: `Tweet id(${id}) not found`})
     }
-    if(tweet.userId !== req.userId){ //로그인한 유저와 게시글작성자 같은지 확인
+    if(tweet.userId !== req.userId){
         return res.sendStatus(403)
     }
-    
-    await tweetRepository.remove(id) // 다 조건에 맞을경우 삭제!
-    res.sendStatus(204)
+    await tweetRepository.remove(id)
+    return res.sendStatus(204)
 }
-
+// 204번으로 하면 메세지 전달 불가.
