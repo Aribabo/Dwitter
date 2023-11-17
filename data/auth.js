@@ -1,17 +1,20 @@
-import { db } from "../db/database.js"
-
-// db연결
-
-export async function createUser(user){
-    const {username, password, name, email, url} = user
-    return db.execute('insert into users (username, password, name, email, url) values(?,?,?,?,?)',[username, password, name, email, url])
-    .then((result)=>result[0].insertId)
+import Mongoose from "mongoose";
+import { useVirtualId } from "../db/database.js";
+const userSchema = new Mongoose.Schema({
+    username: {type: String, require: true},
+    name: {type:String, require: true},
+    email: {type:String, require: true},
+    password: {type:String, require: true},
+    url: String
+})
+useVirtualId(userSchema);
+const User = Mongoose.model('User', userSchema) // model : 컬렉션 생성. 이름은 자동으로 s가 붙고 어떤 형식으로 만들지 옵션을 써줌
+export async function findByUsername(username) {
+    return User.findOne({username});
 }
-
-export async function findByUsername(username){ // 무조건 []로 넣어줘야함
-    return db.execute('select * from users where username = ?',[username]).then((result)=>result[0][0])
-}
-
 export async function findById(id){
-    return db.execute('select * from users where id = ?',[id]).then((result)=>result[0][0])
+    return User.findById(id); // 얘는 user안에 있는 findById라는 몽고디비 함수
+}
+export async function createUser(user) {
+    return new User(user).save().then((data) => data.id); // 메모리에 올라갔던 virtualid
 }

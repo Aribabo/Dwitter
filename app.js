@@ -5,7 +5,7 @@ import authRouter from './router/auth.js'
 import {config} from './config.js'
 import cors from 'cors'
 import { initSocket } from "./connection/socket.js";
-import { db } from "./db/database.js";
+import { connectDB } from "./db/database.js";
 
 
 console.log(process.env.JWT_SECRET)
@@ -24,7 +24,8 @@ app.use((req,res,next)=>{
     res.sendStatus(404)
 });
 
-// db.getConnection().then(connection => console.log(connection))
+connectDB().then(()=>{
+    const server = app.listen(config.host.port)
+    initSocket(server) // 함수 생성 - connection 폴더에 존재(웹소켓 관련 함수 존재)
+}).catch(console.error)
 
-const server = app.listen(config.host.port)
-initSocket(server) // 함수 생성 - connection 폴더에 존재(웹소켓 관련 함수 존재)
